@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scent Traveler | Luxury Inspired Fragrances</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap');
+        :root { --amber-accent: #d97706; }
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #1c1917; scroll-behavior: smooth; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .scent-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .scent-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08); }
+        .loading-shimmer { background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .chart-container { position: relative; width: 100%; height: 320px; }
+        .reveal-section { animation: slideUp 0.6s ease forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="selection:bg-amber-100 selection:text-amber-900">
+
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md fixed top-0 w-full z-50 border-b border-stone-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <a href="#" class="flex items-center">
+                        <img src="images/logo.svg" alt="Scent Traveler Logo" class="h-10 w-auto block" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <!--<span style="display:none;" class="text-2xl font-serif font-bold tracking-tighter text-stone-900 uppercase">Scent<span class="text-amber-600">.11</span></span>--!>
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-10 text-sm font-medium">
+                    <a href="#sommelier" class="text-amber-600 font-bold">✨ Scent AI</a>
+                    <a href="#collection" class="text-stone-500 hover:text-stone-900 transition">Catalog</a>
+                    <button class="px-6 py-2.5 bg-stone-900 text-white text-xs font-bold rounded-full hover:bg-stone-800 transition shadow-lg">Shop Now</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="pt-48 pb-20 bg-stone-50 text-center">
+        <div class="max-w-4xl mx-auto px-4">
+            <h1 class="text-5xl lg:text-7xl font-serif font-bold text-stone-900 leading-tight mb-8">Luxury <span class="text-amber-600 italic">Distilled.</span></h1>
+            <p class="text-lg text-stone-600 mb-10 max-w-xl mx-auto">High-concentration 11ml perfume oil inspirations. Perfectly sized for your next journey.</p>
+            <a href="#sommelier" class="px-10 py-5 bg-stone-900 text-white font-bold rounded-2xl shadow-xl hover:bg-stone-800 transition">✨ Consult Scent AI</a>
+        </div>
+    </header>
+
+    <!-- ✨ AI Scent Sommelier Section -->
+    <section id="sommelier" class="py-24 bg-white">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="bg-stone-900 rounded-[3rem] p-10 md:p-16 text-white shadow-2xl">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl md:text-5xl font-serif font-bold mb-4">Scent Sommelier ✨</h2>
+                    <p class="text-stone-400">Where are you going? How do you want to feel?</p>
+                </div>
+                
+                <div class="space-y-6">
+                    <textarea id="ai-query" class="w-full bg-stone-800 border-none p-6 rounded-3xl text-lg text-stone-100 outline-none" rows="3" placeholder="E.g. I'm wearing a linen suit at a beach party..."></textarea>
+                    
+                    <!-- Feedback Message Box (Hidden by default) -->
+                    <div id="ai-error-box" class="hidden p-4 bg-red-900/30 border border-red-500/50 rounded-2xl text-red-200 text-sm"></div>
+
+                    <button id="ask-ai-btn" class="w-full bg-amber-600 hover:bg-amber-700 py-6 rounded-3xl font-bold text-xl transition shadow-xl shadow-amber-600/20 flex items-center justify-center gap-3">
+                        <span id="btn-text">✨ Find My Scent</span>
+                        <div id="btn-spinner" class="hidden w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ✨ Dynamic Recommendation Shelf -->
+    <section id="ai-recommendation-shelf" class="py-24 bg-amber-50 hidden border-y border-amber-100">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="reveal-section">
+                    <span class="text-amber-600 font-bold uppercase tracking-widest text-[10px] mb-4 block">Personalized Recommendation</span>
+                    <h2 class="text-4xl font-serif font-bold text-stone-900 mb-6">The Perfect Match</h2>
+                    <div id="ai-text-output" class="text-xl font-serif italic text-stone-700 leading-relaxed mb-8"></div>
+                </div>
+                <div id="ai-listing-card-container" class="flex justify-center lg:justify-end reveal-section">
+                    <!-- Recommendation card injected here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Full Catalog -->
+    <section id="collection" class="py-24 bg-stone-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-4xl font-serif font-bold text-stone-900 mb-12">All Inspirations</h2>
+            <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-stone-400 py-20 border-t border-stone-800">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <img src="images/logo.svg" alt="Scent Traveler" class="h-10 w-auto mx-auto mb-8 brightness-0 invert opacity-80" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <!--<span style="display:none;" class="text-2xl font-serif font-bold text-white mb-8 block uppercase">Scent<span class="text-amber-600">.11</span></span>--!>
+            <p class="text-sm max-w-md mx-auto mb-10">Handcrafted perfume oil inspirations. Luxury distilled for the modern nomad.</p>
+            <p class="text-[10px] uppercase tracking-widest text-stone-600">&copy; 2025 Scent Traveler. Powered by Gemini AI.</p>
+        </div>
+    </footer>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-stone-900/90 backdrop-blur-md" onclick="closeModal()"></div>
+        <div class="relative bg-white w-full max-w-5xl rounded-[3rem] overflow-hidden shadow-2xl grid lg:grid-cols-2 animate-in zoom-in duration-300">
+            <div class="bg-stone-100 p-12 flex flex-col items-center">
+                <button class="absolute top-8 left-8 text-3xl text-stone-400 hover:text-stone-900 transition" onclick="closeModal()">&times;</button>
+                <div class="chart-container"><canvas id="radarChart"></canvas></div>
+            </div>
+            <div class="p-12">
+                <h3 class="text-4xl font-serif font-bold mb-2 leading-none" id="modal-title"></h3>
+                <p class="text-amber-600 font-bold text-xs mb-8" id="modal-inspiration"></p>
+                <div id="modal-description" class="text-stone-500 text-sm leading-relaxed mb-10 h-48 overflow-y-auto"></div>
+                <button class="w-full py-5 bg-stone-900 text-white font-bold rounded-2xl shadow-xl hover:bg-stone-800 transition">Add to Cart — $14.99</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. IMPORTANT: ADD YOUR API KEY HERE
+        const apiKey = "AIzaSyAKCTAwfGhkk6G9tPqamRkPIcFcizxOi_Y"; 
+
+        const products = [
+            { id: 1, name: "Wild Ambition", inspiration: "Dior Sauvage", tags: ["fresh"], stats: { Fresh: 9, Spicy: 8, Woody: 6, Sweet: 2, Citrus: 8, Aquatic: 3 }, performance: { longevity: 9, sillage: 8 }, description: "Radically fresh, raw and noble. Wild Ambition blends Calabrian bergamot with spicy pepper and powerful ambroxan.", image: "https://images.unsplash.com/photo-1590736704728-f4730bb30770?auto=format&fit=crop&q=80&w=800" },
+            { id: 2, name: "Emperor's Victory", inspiration: "Creed Aventus", tags: ["woody"], stats: { Fresh: 7, Spicy: 3, Woody: 9, Sweet: 6, Citrus: 5, Aquatic: 2 }, performance: { longevity: 8, sillage: 9 }, description: "The scent of success. Tantalizing pineapple and blackcurrant notes settle into a sophisticated heart of smoky birch.", image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=800" },
+            { id: 3, name: "Purple Aquatic", inspiration: "Rasasi Hawas", tags: ["fresh"], stats: { Fresh: 8, Spicy: 5, Woody: 3, Sweet: 9, Citrus: 4, Aquatic: 10 }, performance: { longevity: 10, sillage: 10 }, description: "An aquatic beast. Blending fresh marine notes with sweet plum and spicy cinnamon for a magnetic trail.", image: "https://images.unsplash.com/photo-1547623641-82fbb83476e9?auto=format&fit=crop&q=80&w=800" },
+            { id: 4, name: "Gentleman's Blue", inspiration: "Givenchy Blue", tags: ["fresh"], stats: { Fresh: 7, Spicy: 6, Woody: 9, Sweet: 2, Citrus: 5, Aquatic: 4 }, performance: { longevity: 7, sillage: 6 }, description: "Refined and charming. A neo-aromatic woody profile featuring crisp citrus facets and a clean dry down.", image: "https://images.unsplash.com/photo-1588405863914-22586d7a1fc3?auto=format&fit=crop&q=80&w=800" },
+            { id: 5, name: "Grey Matter", inspiration: "Tom Ford Grey Vetiver", tags: ["woody"], stats: { Fresh: 8, Spicy: 4, Woody: 10, Sweet: 1, Citrus: 7, Aquatic: 2 }, performance: { longevity: 7, sillage: 5 }, description: "The tailored suit of fragrances. Noble Vetiver brightened with sun-drenched citrus and refined spices.", image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&q=80&w=800" }
+        ];
+
+        let radarChartInstance = null;
+
+        // Clean AI response to handle Markdown blocks (```json ... ```)
+        function cleanJsonResponse(text) {
+            return text.replace(/```json/g, "").replace(/```/g, "").trim();
+        }
+
+        async function runSommelier() {
+            const query = document.getElementById('ai-query').value.trim();
+            const errorBox = document.getElementById('ai-error-box');
+            const btnText = document.getElementById('btn-text');
+            const btnSpinner = document.getElementById('btn-spinner');
+            const shelf = document.getElementById('ai-recommendation-shelf');
+
+            if (!query) return;
+            if (!apiKey) {
+                errorBox.innerText = "⚠️ API Key Missing: Please add your Gemini API Key in the code to use this feature.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            // UI State: Loading
+            errorBox.classList.add('hidden');
+            btnText.classList.add('hidden');
+            btnSpinner.classList.remove('hidden');
+            console.log("Scent AI: Processing request...");
+
+            const sysPrompt = `You are a Scent Sommelier. Recommend ONE product from: ${products.map(p => `ID:${p.id} Name:${p.name}`).join(", ")}. Return ONLY a JSON object: {"id": number, "reason": "Short 2-sentence poetic reason"}.`;
+
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: query }] }],
+                        systemInstruction: { parts: [{ text: sysPrompt }] },
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+
+                if (!response.ok) throw new Error("API Connection Failed");
+
+                const data = await response.json();
+                const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                const cleanJson = cleanJsonResponse(rawText);
+                const result = JSON.parse(cleanJson);
+
+                if (result.id) {
+                    const match = products.find(p => p.id === result.id);
+                    document.getElementById('ai-text-output').innerText = result.reason;
+                    const cardContainer = document.getElementById('ai-listing-card-container');
+                    cardContainer.innerHTML = '';
+                    cardContainer.appendChild(createProductCard(match, true));
+                    
+                    shelf.classList.remove('hidden');
+                    shelf.scrollIntoView({ behavior: 'smooth' });
+                    console.log("Scent AI: Success! Recommended " + match.name);
+                }
+            } catch (err) {
+                console.error("Scent AI Error:", err);
+                errorBox.innerText = "❌ Scent AI is unavailable. Please check your API key or internet connection.";
+                errorBox.classList.remove('hidden');
+            } finally {
+                btnText.classList.remove('hidden');
+                btnSpinner.classList.add('hidden');
+            }
+        }
+
+        function createProductCard(p, isHighlight = false) {
+            const card = document.createElement('div');
+            card.className = `bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm scent-card cursor-pointer flex flex-col ${isHighlight ? 'max-w-sm w-full ring-4 ring-amber-200' : ''}`;
+            card.onclick = () => showModal(p);
+            card.innerHTML = `
+                <div class="h-48 bg-stone-50 rounded-3xl mb-8 overflow-hidden relative">
+                    <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover product-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="hidden w-full h-full items-center justify-center font-serif text-stone-200 text-5xl font-bold">11ml</div>
+                </div>
+                <h3 class="text-2xl font-serif font-bold text-stone-900">${p.name}</h3>
+                <p class="text-amber-600 font-bold text-[10px] uppercase tracking-widest mt-1">Inspired by ${p.inspiration}</p>
+                <div class="mt-8 pt-6 border-t border-stone-50 flex justify-between items-center">
+                    <span class="font-bold text-stone-900">$14.99</span>
+                    <span class="text-amber-600 font-bold text-xs">Details &rarr;</span>
+                </div>
+            `;
+            return card;
+        }
+
+        function showModal(p) {
+            document.getElementById('modal-title').innerText = p.name;
+            document.getElementById('modal-inspiration').innerText = `INSPIRED BY ${p.inspiration.toUpperCase()}`;
+            document.getElementById('modal-description').innerText = p.description;
+            document.getElementById('product-modal').classList.remove('hidden');
+            updateRadar(p);
+        }
+
+        function closeModal() { document.getElementById('product-modal').classList.add('hidden'); }
+
+        function updateRadar(p) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            if (radarChartInstance) radarChartInstance.destroy();
+            radarChartInstance = new Chart(ctx, { type: 'radar', data: { labels: Object.keys(p.stats), datasets: [{ data: Object.values(p.stats), backgroundColor: 'rgba(217, 119, 6, 0.1)', borderColor: '#d97706' }] }, options: { plugins: { legend: { display: false } }, scales: { r: { suggestedMax: 10, ticks: { display: false } } } } });
+        }
+
+        window.onload = () => {
+            const grid = document.getElementById('product-grid');
+            products.forEach(p => grid.appendChild(createProductCard(p)));
+            document.getElementById('ask-ai-btn').onclick = runSommelier;
+        };
+    </script>
+</body>
+</html>
